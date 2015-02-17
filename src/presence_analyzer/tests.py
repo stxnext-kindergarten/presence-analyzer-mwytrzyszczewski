@@ -7,7 +7,11 @@ import json
 import datetime
 import unittest
 
-from presence_analyzer import main, views, utils
+from presence_analyzer import (
+    main,
+    views,
+    utils
+)
 
 
 TEST_DATA_CSV = os.path.join(
@@ -64,13 +68,16 @@ class PresenceAnalyzerViewsTestCase(unittest.TestCase):
         self.assertEqual(resp.status_code, 200)
 
         resp_data = json.loads(resp.data)
-        expected_data = [["Mon", 0],
-                         ["Tue", 30047.0],
-                         ["Wed", 24465.0],
-                         ["Thu", 23705.0],
-                         ["Fri", 0],
-                         ["Sat", 0],
-                         ["Sun", 0]]
+        expected_data = [
+            ["Mon", 0],
+            ["Tue", 30047.0],
+            ["Wed", 24465.0],
+            ["Thu", 23705.0],
+            ["Fri", 0],
+            ["Sat", 0],
+            ["Sun", 0]
+        ]
+
         self.assertEqual(resp_data, expected_data)
 
     def test_presence_weekday_view(self):
@@ -84,14 +91,36 @@ class PresenceAnalyzerViewsTestCase(unittest.TestCase):
         self.assertEqual(resp.status_code, 200)
 
         resp_data = json.loads(resp.data)
-        expected_data = [["Weekday", "Presence (s)"],
-                         ["Mon", 0],
-                         ["Tue", 30047],
-                         ["Wed", 24465],
-                         ["Thu", 23705],
-                         ["Fri", 0],
-                         ["Sat", 0],
-                         ["Sun", 0]]
+        expected_data = [
+            ["Weekday", "Presence (s)"],
+            ["Mon", 0],
+            ["Tue", 30047],
+            ["Wed", 24465],
+            ["Thu", 23705],
+            ["Fri", 0],
+            ["Sat", 0],
+            ["Sun", 0]
+        ]
+
+        self.assertEqual(resp_data, expected_data)
+
+    def test_presence_start_end_view(self):
+        """
+        Test mean starting and ending time.
+        """
+        resp = self.client.get('/api/v1/presence_start_end/10')
+        self.assertEqual(resp.status_code, 200)
+        resp_data = json.loads(resp.data)
+        expected_data = [
+            ['Mon', 0, 0],
+            ['Tue', 34745.0, 64792.0],
+            ['Wed', 33592.0, 58057.0],
+            ['Thu', 38926.0, 62631.0],
+            ['Fri', 0, 0],
+            ['Sat', 0, 0],
+            ['Sun', 0, 0]
+        ]
+
         self.assertEqual(resp_data, expected_data)
 
 
@@ -131,7 +160,7 @@ class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
         """
         Test groups presence entries by weekday.
         """
-        a_week = {
+        sample_week = {
             datetime.date(2015, 2, 2): {
                 'start': datetime.time(9, 0, 0),
                 'end': datetime.time(17, 0, 0)
@@ -162,7 +191,7 @@ class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
             },
         }
 
-        result = utils.group_by_weekday(a_week)
+        result = utils.group_by_weekday(sample_week)
         self.assertIsInstance(result, list)
         self.assertItemsEqual(
             result,
@@ -222,6 +251,25 @@ class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
         items = [1.8, 2.1, 3.7, 4.3]
         result = utils.mean(items)
         self.assertEqual(result, 2.975)
+
+    def test_group_start_end_times_by_weekday(self):
+        """
+        Test creating list starting and ending work time for specyfic user.
+        """
+        some_data = utils.get_data()
+        expected_data = {
+            0: {'start': [], 'end': []},
+            1: {'start': [34745], 'end': [64792]},
+            2: {'start': [33592], 'end': [58057]},
+            3: {'start': [38926], 'end': [62631]},
+            4: {'start': [], 'end': []},
+            5: {'start': [], 'end': []},
+            6: {'start': [], 'end': []}
+        }
+
+        result = utils.group_start_end_times_by_weekday(some_data[10])
+        self.assertIsInstance(result, dict)
+        self.assertItemsEqual(result, expected_data)
 
 
 def suite():
