@@ -4,8 +4,8 @@ Defines views.
 """
 
 import calendar
-import datetime
-from flask import redirect, abort
+from flask import redirect, abort, render_template
+import jinja2
 
 from presence_analyzer.main import app
 from presence_analyzer.utils import (
@@ -21,12 +21,36 @@ import logging
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
+@app.errorhandler(404)
+def page_not_found(error):
+    """
+    Shows "Error 404 page not found" message.
+    """
+    return render_template('error.html', error=error), 404
+
+
 @app.route('/')
 def mainpage():
     """
     Redirects to front page.
     """
-    return redirect('/static/presence_weekday.html')
+    return redirect('/presence_weekday')
+
+
+@app.route('/<chosen_template>')
+def page_to_display(chosen_template):
+    """
+    Shows page with chosen option.
+    """
+    options = {
+        'presence_weekday': 'Presence by weekday',
+        'mean_time_weekday': 'Presence mean time',
+        'presence_start_end': 'Presence start-end'
+    }
+    try:
+        return render_template(chosen_template+'.html', options=options)
+    except jinja2.TemplateNotFound:
+        return render_template('error.html', error='Page not found.'), 404
 
 
 @app.route('/api/v1/users', methods=['GET'])
