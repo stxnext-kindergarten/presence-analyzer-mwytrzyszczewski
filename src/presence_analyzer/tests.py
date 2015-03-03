@@ -44,7 +44,7 @@ class PresenceAnalyzerViewsTestCase(unittest.TestCase):
         """
         resp = self.client.get('/')
         self.assertEqual(resp.status_code, 302)
-        assert resp.headers['Location'].endswith('/presence_weekday.html')
+        assert resp.headers['Location'].endswith('presence_weekday')
 
     def test_api_users(self):
         """
@@ -122,6 +122,19 @@ class PresenceAnalyzerViewsTestCase(unittest.TestCase):
         ]
 
         self.assertEqual(resp_data, expected_data)
+
+    def test_page_to_display(self):
+        """
+        Test showing chosen page, including "error 404".
+        """
+        resp = self.client.get('/mean_time_weekday')
+        self.assertEqual(resp.status_code, 200)
+        resp = self.client.get('/presence_start_end')
+        self.assertEqual(resp.status_code, 200)
+        resp = self.client.get('/presence_weekday')
+        self.assertEqual(resp.status_code, 200)
+        resp = self.client.get('/nonexistingpage')
+        self.assertEqual(resp.status_code, 404)
 
 
 class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
@@ -252,6 +265,7 @@ class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
         result = utils.mean(items)
         self.assertEqual(result, 2.975)
 
+# pylint: disable=C0103
     def test_group_start_end_times_by_weekday(self):
         """
         Test creating list starting and ending work time for specyfic user.
@@ -270,6 +284,7 @@ class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
         result = utils.group_start_end_times_by_weekday(some_data[10])
         self.assertIsInstance(result, dict)
         self.assertItemsEqual(result, expected_data)
+# pylint: enable=C0103
 
 
 def suite():
