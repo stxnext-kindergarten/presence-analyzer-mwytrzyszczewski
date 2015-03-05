@@ -104,7 +104,6 @@ def mean(items):
     return float(sum(items)) / len(items) if len(items) > 0 else 0
 
 
-# pylint: disable=C0103
 def group_start_end_times_by_weekday(items):
     """
     Return a list with starts and ends for each weekday.
@@ -124,4 +123,3 @@ def group_start_end_times_by_weekday(items):
         )
 
     return user_week
-# pylint: enable=C0103
