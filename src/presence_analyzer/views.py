@@ -3,9 +3,10 @@
 Defines views.
 """
 
+# p y lint: disable=import-error, no-name-in-module
 import calendar
-from flask import redirect, abort, render_template
-import jinja2
+from flask import redirect, abort
+from flask.ext.mako import render_template, exceptions
 
 from presence_analyzer.main import app
 from presence_analyzer.utils import (
@@ -15,7 +16,6 @@ from presence_analyzer.utils import (
     group_by_weekday,
     group_start_end_times_by_weekday
 )
-
 
 import logging
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -49,7 +49,7 @@ def page_to_display(chosen_template):
     }
     try:
         return render_template(chosen_template+'.html', options=options)
-    except jinja2.TemplateNotFound:
+    except exceptions.TemplateLookupException:
         return render_template('error.html', error='Page not found.'), 404
 
 

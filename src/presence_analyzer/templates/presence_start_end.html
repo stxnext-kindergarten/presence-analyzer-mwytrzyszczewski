@@ -1,7 +1,7 @@
-{% extends "base.html" %}
+<%inherit file="base.html"/>
 
 
-{% block java_script %}
+<%block name="block_java_script">
     <script type="text/javascript">
         google.load("visualization", "1", {packages:["corechart", "timeline"], 'language': 'pl'});
     </script>
@@ -12,7 +12,7 @@
         (function($) {
             $(document).ready(function() {
                 var loading = $('#loading');
-                $.getJSON("{{ url_for('users_view') }}", function(result) {
+                $.getJSON("${ url_for('users_view') }", function(result) {
                     var dropdown = $("#user_id");
                     $.each(result, function(item) {
                         dropdown.append($("<option />").val(this.user_id).text(this.name));
@@ -25,8 +25,8 @@
                         chart_div = $('#chart_div');
                     if(selected_user) {
                         loading.show();
-                        chart_div.hide();                        
-                        $.getJSON("{{ url_for('presence_start_end_view', user_id=0) }}"+selected_user,
+                        chart_div.hide();
+                        $.getJSON("${ url_for('presence_start_end_view', user_id=0) }"+selected_user,
                             function(result) {
                                 $.each(result, function( index, value ) {
                                     value[1] = parseInterval(value[1]);
@@ -54,9 +54,9 @@
             });
         })(jQuery);
     </script>
-{% endblock %}
+</%block>
 
 
-{% block option_name %}
+<%block name="block_title">
     Presence start-end weekday
-{% endblock %}
+</%block>

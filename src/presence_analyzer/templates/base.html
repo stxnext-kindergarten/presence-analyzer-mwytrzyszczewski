@@ -8,15 +8,14 @@
     <meta name="author" content="STX Next sp. z o.o."/>
     <meta name="viewport" content="width=device-width; initial-scale=1.0">
     
-    <link href="{{ url_for('static', filename='css/normalize.css') }}" media="all" rel="stylesheet" type="text/css" />
-    <link href="{{ url_for('static', filename='css/styles.css') }}"    media="all" rel="stylesheet" type="text/css" />
+    <link href="${ url_for('static', filename='css/normalize.css') }" media="all" rel="stylesheet" type="text/css" />
+    <link href="${ url_for('static', filename='css/styles.css') }"    media="all" rel="stylesheet" type="text/css" />
 
-    <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
-    <script type="text/javascript" src="https://www.google.com/jsapi"></script>    
+    <script src="${ url_for('static', filename='js/jquery.min.js') }"></script>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
 
-    {% block java_script %}
-    {% endblock %}
-
+    <%block name="block_java_script">
+    </%block>
 </head>
 
 <body>
@@ -24,23 +23,24 @@
         <div id="header">
             <h1>Presence analyzer</h1>
             <ul>
-                {% for opt in options.keys() %}
-                    {% if opt == request.path[1:]  %}
-                        <li id="selected"> 
-                    {% else %}
+                <div class="options">
+                     % for opt in options.keys():
+                         % if opt == request.path[1:]:
+                         <li id="selected">
+                         % else:
                          <li>
-                    {% endif %}
-                    <a href="{{ url_for('page_to_display', chosen_template=opt) }}">
-                        {{ options[opt] }}
-                    </a>
-                    </li>
-                {% endfor %}
+                         % endif
+                         <a href="${ url_for('page_to_display', chosen_template=opt) }">
+                            ${options[opt]}
+                         </a>
+                         </li>
+                     % endfor
+                </div>
             </ul>
         </div>
         <div id="content">
             <h2>
-                {% block option_name %}
-                {% endblock %}
+                <%block name="block_title"></%block>
             </h2>
             <p>
                 <select id="user_id" style="display: none">
@@ -49,9 +49,10 @@
                 <div id="chart_div" style="display: none">
                 </div>
                 <div id="loading">
-                    <img src="{{ url_for('static', filename='img/loading.gif') }}">
+                    <img src="${url_for('static', filename='img/loading.gif')}" />
                 </div>
             </p>
         </div>
     </div>
 </body>
+</html>

@@ -1,18 +1,18 @@
-{% extends "base.html" %}
+<%inherit file="base.html"/>
 
 
-{% block java_script %}
+<%block name="block_java_script">
     <script type="text/javascript">
         google.load("visualization", "1", {packages:["corechart"], 'language': 'pl'});
     </script>
 
-    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+    <script src="${ url_for('static', filename='js/scripts.js') }"></script>
 
     <script type="text/javascript">
         (function($) {
             $(document).ready(function() {
                 var loading = $('#loading');
-                $.getJSON("{{ url_for('users_view') }}", function(result) {
+                $.getJSON("${ url_for('users_view') }", function(result) {
                     var dropdown = $("#user_id");
                     $.each(result, function(item) {
                         dropdown.append($("<option />").val(this.user_id).text(this.name));
@@ -26,7 +26,7 @@
                     if(selected_user) {
                         loading.show();
                         chart_div.hide();
-                        $.getJSON("{{ url_for('mean_time_weekday_view', user_id=0) }}"+selected_user,
+                        $.getJSON("${ url_for('mean_time_weekday_view', user_id=0) }"+selected_user,
                             function(result) {
                                 $.each(result, function(index, value) {
                                     value[1] = parseInterval(value[1]);
@@ -51,9 +51,9 @@
             });
         })(jQuery);
     </script>
-{% endblock %}
+</%block>
 
 
-{% block option_name %}
+<%block name="block_title">
     Presence mean time by weekday
-{% endblock %}
+</%block>
