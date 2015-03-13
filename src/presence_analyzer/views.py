@@ -3,10 +3,11 @@
 Defines views.
 """
 
-# p y lint: disable=import-error, no-name-in-module
+# pylint: disable=import-error, no-name-in-module
 import calendar
-from flask import redirect, abort
+from flask import redirect
 from flask.ext.mako import render_template, exceptions
+from lxml import etree
 
 from presence_analyzer.main import app
 from presence_analyzer.utils import (
@@ -42,11 +43,16 @@ def page_to_display(chosen_template):
     """
     Shows page with chosen option.
     """
-    options = {
-        'presence_weekday': 'Presence by weekday',
-        'mean_time_weekday': 'Presence mean time',
-        'presence_start_end': 'Presence start-end'
-    }
+    # options = {
+    #     'presence_weekday': 'Presence by weekday',
+    #     'mean_time_weekday': 'Presence mean time',
+    #     'presence_start_end': 'Presence start-end'
+    # }
+    options = [
+        ['presence_weekday', 'Presence by weekday'],
+        ['mean_time_weekday', 'Presence mean time'],
+        ['presence_start_end', 'Presence start-end']
+    ]
     try:
         return render_template(chosen_template+'.html', options=options)
     except exceptions.TemplateLookupException:
@@ -66,6 +72,31 @@ def users_view():
     ]
 
 
+@app.route('/api/v1/users_data', methods=['GET'])
+@jsonify
+def users_view_data():
+    """
+    Users listing for dropdown.
+    """
+    with open(app.config['USERS_XML_LOCAL_FILE'], 'r') as f_xml:
+        tree = etree.parse(f_xml)
+    data_server = tree.find('server')
+    url_prefix = '{0}://{1}:{2}'.format(
+        data_server.find('protocol').text,
+        data_server.find('host').text,
+        data_server.find('port').text
+    )
+    result = [
+        {
+            'user_id': person.get('id'),
+            'name': person.findtext('name'),
+            'avatar': '{0}{1}'.format(url_prefix, person.findtext('avatar')),
+        }
+        for person in tree.findall('./users/user')
+    ]
+    return result
+
+
 @app.route('/api/v1/mean_time_weekday/<int:user_id>', methods=['GET'])
 @jsonify
 def mean_time_weekday_view(user_id):
@@ -75,7 +106,7 @@ def mean_time_weekday_view(user_id):
     data = get_data()
     if user_id not in data:
         log.debug('User %s not found!', user_id)
-        abort(404)
+        return 'no_data'
 
     weekdays = group_by_weekday(data[user_id])
     result = [
@@ -95,7 +126,7 @@ def presence_weekday_view(user_id):
     data = get_data()
     if user_id not in data:
         log.debug('User %s not found!', user_id)
-        abort(404)
+        return 'no_data'
 
     weekdays = group_by_weekday(data[user_id])
     result = [
@@ -116,7 +147,7 @@ def presence_start_end_view(user_id):
     data = get_data()
     if user_id not in data:
         log.debug('User %s not found!', user_id)
-        abort(404)
+        return 'no_data'
 
     week = group_start_end_times_by_weekday(data[user_id])
 

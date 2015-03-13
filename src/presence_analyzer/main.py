@@ -2,7 +2,7 @@
 """
 Flask app initialization.
 """
-# p y lint: disable=import-error, no-name-in-module
+# pylint: disable=import-error, no-name-in-module
 from flask import Flask
 from flask.ext.mako import MakoTemplates
 

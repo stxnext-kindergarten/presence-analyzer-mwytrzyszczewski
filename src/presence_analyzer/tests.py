@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 # -*- coding: utf-8 -*-
 """
 Presence analyzer unit tests.
@@ -7,15 +8,19 @@ import json
 import datetime
 import unittest
 
+
 from presence_analyzer import (
     main,
-    views,
     utils
 )
 
 
 TEST_DATA_CSV = os.path.join(
     os.path.dirname(__file__), '..', '..', 'runtime', 'data', 'test_data.csv'
+)
+
+TEST_USER_XML = os.path.join(
+    os.path.dirname(__file__), '..', '..', 'runtime', 'data', 'test_users.xml'
 )
 
 
@@ -27,9 +32,10 @@ class PresenceAnalyzerViewsTestCase(unittest.TestCase):
 
     def setUp(self):
         """
-        Before each test, set up a environment.
+        Before each test, set up an environment.
         """
         main.app.config.update({'DATA_CSV': TEST_DATA_CSV})
+        main.app.config.update({'USERS_XML_LOCAL_FILE': TEST_USER_XML})
         self.client = main.app.test_client()
 
     def tearDown(self):
@@ -55,14 +61,47 @@ class PresenceAnalyzerViewsTestCase(unittest.TestCase):
         self.assertEqual(resp.content_type, 'application/json')
         data = json.loads(resp.data)
         self.assertEqual(len(data), 2)
-        self.assertDictEqual(data[0], {u'user_id': 10, u'name': u'User 10'})
+        self.assertDictEqual(data[0], {'user_id': 10, 'name': 'User 10'})
+
+    def test_api_users_data(self):
+        """
+        Test users listing with personal data.
+        """
+        resp = self.client.get('/api/v1/users_data')
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.content_type, 'application/json')
+
+        data = json.loads(resp.data)
+        self.assertEqual(len(data), 3)
+
+        expected_data = [
+            {
+                'user_id': '141',
+                'name': 'Adam P.',
+                'avatar': 'https://intranet.stxnext.pl:443'
+                          '/api/images/users/141',
+            },
+            {
+                'user_id': '176',
+                'name': 'Adrian K.',
+                'avatar': 'https://intranet.stxnext.pl:443'
+                          '/api/images/users/176',
+            },
+            {
+                'user_id': '170',
+                'name': 'Agata J.',
+                'avatar': 'https://intranet.stxnext.pl:443'
+                          '/api/images/users/170',
+            },
+        ]
+        self.assertListEqual(json.loads(resp.data), expected_data)
 
     def test_mean_time_weekday_view(self):
         """
         Test mean time weekday view.
         """
         resp = self.client.get('/api/v1/mean_time_weekday/10000')
-        self.assertEqual(resp.status_code, 404)
+        self.assertEqual(json.loads(resp.data), 'no_data')
 
         resp = self.client.get('/api/v1/mean_time_weekday/10')
         self.assertEqual(resp.status_code, 200)
@@ -85,7 +124,7 @@ class PresenceAnalyzerViewsTestCase(unittest.TestCase):
         Test presence weekday view.
         """
         resp = self.client.get('/api/v1/presence_weekday/10000')
-        self.assertEqual(resp.status_code, 404)
+        self.assertEqual(json.loads(resp.data), 'no_data')
 
         resp = self.client.get('/api/v1/presence_weekday/10')
         self.assertEqual(resp.status_code, 200)
@@ -108,6 +147,8 @@ class PresenceAnalyzerViewsTestCase(unittest.TestCase):
         """
         Test mean starting and ending time.
         """
+        resp = self.client.get('/api/v1/presence_start_end/10000')
+        self.assertEqual(json.loads(resp.data), 'no_data')
         resp = self.client.get('/api/v1/presence_start_end/10')
         self.assertEqual(resp.status_code, 200)
         resp_data = json.loads(resp.data)
@@ -265,7 +306,7 @@ class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
         result = utils.mean(items)
         self.assertEqual(result, 2.975)
 
-# pylint: disable=C0103
+# pylint: disable=import-error, no-name-in-module
     def test_group_start_end_times_by_weekday(self):
         """
         Test creating list starting and ending work time for specyfic user.
@@ -284,7 +325,7 @@ class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
         result = utils.group_start_end_times_by_weekday(some_data[10])
         self.assertIsInstance(result, dict)
         self.assertItemsEqual(result, expected_data)
-# pylint: enable=C0103
+# pylint: enable=import-error, no-name-in-module
 
 
 def suite():
