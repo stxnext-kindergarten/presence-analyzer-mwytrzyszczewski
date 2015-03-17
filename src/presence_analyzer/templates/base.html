@@ -7,7 +7,7 @@
     <meta name="description" content=""/>
     <meta name="author" content="STX Next sp. z o.o."/>
     <meta name="viewport" content="width=device-width; initial-scale=1.0">
-    
+
     <link href="${ url_for('static', filename='css/normalize.css') }" media="all" rel="stylesheet" type="text/css" />
     <link href="${ url_for('static', filename='css/styles.css') }"    media="all" rel="stylesheet" type="text/css" />
 
@@ -24,14 +24,14 @@
             <h1>Presence analyzer</h1>
             <ul>
                 <div class="options">
-                     % for opt in options.keys():
-                         % if opt == request.path[1:]:
+                     % for opt in options:
+                         % if opt[0] == request.path[1:]:
                          <li id="selected">
                          % else:
                          <li>
                          % endif
-                         <a href="${ url_for('page_to_display', chosen_template=opt) }">
-                            ${options[opt]}
+                         <a href="${ url_for('page_to_display', chosen_template=opt[0]) }">
+                             ${opt[1]}
                          </a>
                          </li>
                      % endfor
@@ -46,6 +46,8 @@
                 <select id="user_id" style="display: none">
                     <option value="">--</option>
                 </select>
+                <br><img src="" id="avatar">
+                <br><p id="no_data"><b>No data for selected user.</b></p>
                 <div id="chart_div" style="display: none">
                 </div>
                 <div id="loading">
