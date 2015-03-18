@@ -6,5 +6,6 @@ Flask app initialization.
 from flask import Flask
 from flask.ext.mako import MakoTemplates
 
-app = Flask(__name__)  # pylint: disable=invalid-name
+# pylint: disable=invalid-name
+app = Flask(__name__)
 mako = MakoTemplates(app)
