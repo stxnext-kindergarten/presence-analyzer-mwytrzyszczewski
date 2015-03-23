@@ -7,13 +7,18 @@ import csv
 from json import dumps
 from functools import wraps
 from datetime import datetime
-
+import time
+import threading
 from flask import Response
 
 from presence_analyzer.main import app
 
 import logging
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
+
+
+CACHE_TIMESTAMP = {}
+CACHE_DATA = {}
 
 
 def jsonify(function):
@@ -32,6 +37,39 @@ def jsonify(function):
     return inner
 
 
+def memoize(period_of_validity):
+    """
+    Decorator - aplies cache for wrapped function.
+    """
+    lock = threading.Lock()
+
+    def _memoize(cached_func):
+        """
+        First inner function for decorator.
+        """
+
+        def __memoize(*args, **kw):
+            """
+            Second inner function for decorator.
+            """
+            function_id = cached_func.__name__
+            now = time.time()
+            with lock:
+                if (function_id in CACHE_TIMESTAMP) and \
+                   (CACHE_TIMESTAMP[function_id] +
+                   period_of_validity) > now:
+                    return CACHE_DATA[function_id]
+
+                result = cached_func(*args, **kw)
+                CACHE_DATA[function_id] = result
+
+                CACHE_TIMESTAMP[function_id] = now
+                return result
+        return __memoize
+    return _memoize
+
+
+@memoize(600)
 def get_data():
     """
     Extracts presence data from CSV file and groups it by user_id.

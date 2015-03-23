@@ -43,11 +43,6 @@ def page_to_display(chosen_template):
     """
     Shows page with chosen option.
     """
-    # options = {
-    #     'presence_weekday': 'Presence by weekday',
-    #     'mean_time_weekday': 'Presence mean time',
-    #     'presence_start_end': 'Presence start-end'
-    # }
     options = [
         ['presence_weekday', 'Presence by weekday'],
         ['mean_time_weekday', 'Presence mean time'],
@@ -79,7 +74,7 @@ def users_view_data():
     Users listing for dropdown.
     """
     with open(app.config['USERS_XML_LOCAL_FILE'], 'r') as f_xml:
-        tree = etree.parse(f_xml)
+        tree = etree.parse(f_xml)    # pylint: disable=no-member
     data_server = tree.find('server')
     url_prefix = '{0}://{1}:{2}'.format(
         data_server.find('protocol').text,

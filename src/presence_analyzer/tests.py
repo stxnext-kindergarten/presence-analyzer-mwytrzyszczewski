@@ -8,7 +8,6 @@ import json
 import datetime
 import unittest
 
-
 from presence_analyzer import (
     main,
     utils
@@ -194,6 +193,47 @@ class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
         Get rid of unused objects after each test.
         """
         pass
+
+    def test_memoize_decorator(self):
+        """
+        Test caching decorator.
+        """
+        utils.CACHE_DATA = {}
+        utils.CACHE_TIMESTAMP = {}
+        cache_size_1 = len(utils.CACHE_DATA)
+        cache_timestamp_size_1 = len(utils.CACHE_TIMESTAMP)
+        utils.get_data()
+        cache_size_2 = len(utils.CACHE_DATA)
+        cache_timestamp_size_2 = len(utils.CACHE_TIMESTAMP)
+
+        self.assertEqual(cache_size_1, 0)
+        self.assertEqual(cache_size_2, 1)
+        self.assertEqual(cache_timestamp_size_1, 0)
+        self.assertEqual(cache_timestamp_size_2, 1)
+        self.assertEqual(('get_data' in utils.CACHE_DATA), True)
+        self.assertEqual(('get_data' in utils.CACHE_TIMESTAMP), True)
+
+        expected_data = {
+            datetime.date(2013, 9, 10): {
+                'start': datetime.time(9, 39, 5),
+                'end': datetime.time(17, 59, 52)
+            },
+            datetime.date(2013, 9, 12): {
+                'start': datetime.time(10, 48, 46),
+                'end': datetime.time(17, 23, 51)
+            },
+            datetime.date(2013, 9, 11): {
+                'start': datetime.time(9, 19, 52),
+                'end': datetime.time(16, 7, 37)
+            }
+        }
+        self.assertEqual(utils.CACHE_DATA['get_data'][10], expected_data)
+
+        del utils.CACHE_DATA['get_data'][10]
+        self.assertEqual((10 in utils.CACHE_DATA['get_data']), False)
+        utils.CACHE_TIMESTAMP['get_data'] = 0
+        utils.get_data()
+        self.assertEqual(utils.CACHE_DATA['get_data'][10], expected_data)
 
     def test_get_data(self):
         """
