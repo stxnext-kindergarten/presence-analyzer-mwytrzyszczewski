@@ -346,6 +346,42 @@ class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
         result = utils.mean(items)
         self.assertEqual(result, 2.975)
 
+    def test_median(self):
+        """
+        Test calculating median.
+        """
+        items = []
+        result = utils.median(items)
+        self.assertEqual(result, 0.0)
+
+        items = [5]
+        result = utils.median(items)
+        self.assertEqual(result, 5.0)
+
+        items = [10, 2, 8]
+        result = utils.median(items)
+        self.assertEqual(result, 8.0)
+
+        items = [11, 1, 5, 9]
+        result = utils.median(items)
+        self.assertEqual(result, 7.0)
+
+        items = [20, -3, 44, -5]
+        result = utils.median(items)
+        self.assertEqual(result, 8.5)
+
+        items = [-88, -23, -2]
+        result = utils.median(items)
+        self.assertEqual(result, -23.0)
+
+        items = [-6, -21, -8, -12]
+        result = utils.median(items)
+        self.assertEqual(result, -10.0)
+
+        items = [-1.5, 2.1, -3.1, 4.3]
+        result = utils.median(items)
+        self.assertAlmostEqual(result, 0.3)
+
 # pylint: disable=import-error, no-name-in-module
     def test_group_start_end_times_by_weekday(self):
         """

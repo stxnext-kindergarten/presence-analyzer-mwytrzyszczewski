@@ -1,0 +1,75 @@
+<%inherit file="base.html"/>
+
+
+<%block name="block_java_script">
+    <script type="text/javascript">
+        google.load("visualization", "1", {packages:["corechart"], 'language': 'pl'});
+    </script>
+
+    <script src="${ url_for('static', filename='js/scripts.js') }"></script>
+
+    <script type="text/javascript">
+        (function($) {
+            $(document).ready(function() {
+                $('#avatar').hide();
+                $('#no_data').hide();
+                var loading = $('#loading');
+                $.getJSON("${ url_for('users_view_data') }", function(result) {
+                    var dropdown = $("#user_id");
+                    $.each(result, function(item) {
+                        var user = $("<option />").val(this.user_id).text(this.name);
+                        user.attr('avatar', this.avatar);
+                        dropdown.append(user);
+                    });
+                    dropdown.show();
+                    loading.hide();
+                });
+                $('#user_id').change(function() {
+                    var selected_user = $("#user_id").val(),
+                        chart_div = $('#chart_div'),
+                        avatar_url = $('option:selected', this).attr('avatar');
+                    if (selected_user) {
+                        loading.show();
+                        chart_div.hide();
+                        $.getJSON("${ url_for('median_weekday_view', user_id=0) }"+selected_user,
+                            function(result) {
+                                if (result == 'no_data') {
+                                    loading.hide();
+                                    $('#no_data').show();
+                                } else {
+                                    $('#no_data').hide();
+                                    $.each(result, function(index, value) {
+                                        value[1] = parseInterval(value[1]);
+                                    });
+                                    var data = new google.visualization.DataTable();
+                                    data.addColumn('string', 'Weekday');
+                                    data.addColumn('datetime', 'Median time (h:m:s)');
+                                    data.addRows(result);
+                                    var options = {
+                                        hAxis: {title: 'Weekday'}
+                                    },
+                                        formatter = new google.visualization.DateFormat({pattern: 'HH:mm:ss'});
+                                    formatter.format(data, 1);
+
+                                    chart_div.show();
+                                    loading.hide();
+                                    var chart = new google.visualization.ColumnChart(chart_div[0]);
+                                    chart.draw(data, options);
+                                }
+                            });
+                        $('#avatar').attr('src', avatar_url).show();
+                    } else {
+                        $('#avatar').hide();
+                        $('#no_data').hide();
+                        $('#chart_div').hide();
+                    }
+                });
+            });
+        })(jQuery);
+    </script>
+</%block>
+
+
+<%block name="block_title">
+    Presence median time by weekday
+</%block>

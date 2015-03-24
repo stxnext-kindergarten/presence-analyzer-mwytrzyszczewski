@@ -145,7 +145,7 @@ def mean(items):
 # pylint: disable=invalid-name
 def group_start_end_times_by_weekday(items):
     """
-    Return a list with starts and ends for each weekday.
+    Returns a list with starts and ends for each weekday.
     """
     user_week = {
         i: {'start': [], 'end': []}
@@ -162,3 +162,21 @@ def group_start_end_times_by_weekday(items):
         )
 
     return user_week
+
+
+def median(input_list):
+    """
+    Returns a median value from given list.
+    """
+    list_sorted = sorted(input_list)
+    list_size = len(list_sorted)
+    if not list_size:
+        return 0.0
+    else:
+        if not (list_size % 2):
+            idx1 = list_size / 2 - 1
+            idx2 = idx1 + 1
+            return (list_sorted[idx2] + list_sorted[idx1]) / 2.0
+        else:
+            idx = list_size / 2
+            return float(list_sorted[idx])

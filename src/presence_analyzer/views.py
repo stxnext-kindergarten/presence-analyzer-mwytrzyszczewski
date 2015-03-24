@@ -15,7 +15,8 @@ from presence_analyzer.utils import (
     get_data,
     mean,
     group_by_weekday,
-    group_start_end_times_by_weekday
+    group_start_end_times_by_weekday,
+    median
 )
 
 import logging
@@ -46,7 +47,8 @@ def page_to_display(chosen_template):
     options = [
         ['presence_weekday', 'Presence by weekday'],
         ['mean_time_weekday', 'Presence mean time'],
-        ['presence_start_end', 'Presence start-end']
+        ['presence_start_end', 'Presence start-end'],
+        ['median_weekday', 'Presence median time']
     ]
     try:
         return render_template(chosen_template+'.html', options=options)
@@ -108,7 +110,6 @@ def mean_time_weekday_view(user_id):
         (calendar.day_abbr[weekday], mean(intervals))
         for weekday, intervals in enumerate(weekdays)
     ]
-
     return result
 
 
@@ -152,4 +153,23 @@ def presence_start_end_view(user_id):
         ends = mean(week[day]['end'])
         result.append([calendar.day_abbr[day], starts, ends])
 
+    return result
+
+
+@app.route('/api/v1/median_weekday/<int:user_id>', methods=['GET'])
+@jsonify
+def median_weekday_view(user_id):
+    """
+    Returns mean presence time of given user grouped by weekday.
+    """
+    data = get_data()
+    if user_id not in data:
+        log.debug('User %s not found!', user_id)
+        return 'no_data'
+
+    weekdays = group_by_weekday(data[user_id])
+    result = [
+        (calendar.day_abbr[weekday], median(intervals))
+        for weekday, intervals in enumerate(weekdays)
+    ]
     return result
