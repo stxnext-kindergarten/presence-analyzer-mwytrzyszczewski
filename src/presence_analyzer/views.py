@@ -8,6 +8,7 @@ import calendar
 from flask import redirect
 from flask.ext.mako import render_template, exceptions
 from lxml import etree
+import locale
 
 from presence_analyzer.main import app
 from presence_analyzer.utils import (
@@ -83,7 +84,8 @@ def users_view_data():
         data_server.find('host').text,
         data_server.find('port').text
     )
-    result = [
+    locale.setlocale(locale.LC_COLLATE, ('pl', 'utf-8'))
+    not_sorted_list = [
         {
             'user_id': person.get('id'),
             'name': person.findtext('name'),
@@ -91,6 +93,11 @@ def users_view_data():
         }
         for person in tree.findall('./users/user')
     ]
+    result = sorted(
+        not_sorted_list,
+        key=lambda person: person['name'],
+        cmp=locale.strcoll
+    )
     return result
 
 
